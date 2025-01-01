@@ -27,6 +27,17 @@ const getOne = async (req, res) => {
   }
 };
 
+const getMany = async (req, res) => {
+  try {
+    const products = await productService.getMany(req.body);
+
+    res.json(products);
+  } catch (e) {
+    console.log(e);
+    res.sendStatus(500);
+  }
+};
+
 const create = async (req, res) => {
   try {
     const productData = req.body;
@@ -45,7 +56,7 @@ const create = async (req, res) => {
         isDefault: productData.priceIsDefault ? 1 : 0,
       },
       {
-        value: (productData.price / currencyRateToUAH.uah.usd).toFixed(2),
+        value: (productData.price * currencyRateToUAH.uah.usd).toFixed(2),
         symbol: 'USD',
         isDefault: productData.priceIsDefault ? 0 : 1,
       },
@@ -64,9 +75,7 @@ const create = async (req, res) => {
 
 const remove = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    await productService.remove(id);
+    await productService.remove(req.params.id);
 
     res.sendStatus(200);
   } catch (e) {
@@ -78,6 +87,7 @@ const remove = async (req, res) => {
 export default {
   get,
   getOne,
+  getMany,
   create,
   remove,
 };

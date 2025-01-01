@@ -66,6 +66,45 @@ const getById = async id => {
   }
 };
 
+const getMany = async ids => {
+  try {
+    const [products] = await db.query(
+      `
+      SELECT *
+      FROM products
+      WHERE id IN (?)
+    `,
+      [ids],
+    );
+
+    const [prices] = await db.query(
+      `
+      SELECT *
+      FROM prices
+      WHERE product_id IN (?)
+    `,
+      [ids],
+    );
+
+    return products.map(product => {
+      const pPrice = prices.filter(price => price.product_id === product.id);
+      const resultPrices = pPrice.map(price => ({
+        value: price.value,
+        symbol: price.symbol,
+        isDefault: price.isDefault,
+      }));
+
+      return {
+        ...product,
+        prices: resultPrices,
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching products by IDs:', error);
+    throw new Error('Could not fetch products by IDs');
+  }
+};
+
 const create = async productData => {
   try {
     const {
@@ -159,6 +198,7 @@ const createProductPrices = async (productId, prices) => {
 export default {
   getAll,
   getById,
+  getMany,
   create,
   remove,
 };
