@@ -7,6 +7,24 @@ const getAll = async () => {
       FROM orders
     `);
 
+    for (const order of orders) {
+      const [products] = await db.query(
+        `
+          SELECT COUNT(*) AS count,
+                 SUM(CASE WHEN prices.symbol = 'UAH' THEN prices.value ELSE 0 END) AS priceUAH,
+                 SUM(CASE WHEN prices.symbol = 'USD' THEN prices.value ELSE 0 END) AS priceUSD
+          FROM products
+                   LEFT JOIN prices ON products.id = prices.product_id
+          WHERE products.order_id = ?
+      `,
+        [order.id],
+      );
+
+      order.productsCount = products[0].count;
+      order.priceUAH = products[0].priceUAH;
+      order.priceUSD = products[0].priceUSD;
+    }
+
     return orders;
   } catch (error) {
     console.error('Error fetching orders:', error);
@@ -28,6 +46,22 @@ const getById = async id => {
     if (!orders.length) {
       return;
     }
+
+    const [products] = await db.query(
+      `
+          SELECT COUNT(*) AS count,
+                 SUM(CASE WHEN prices.symbol = 'UAH' THEN prices.value ELSE 0 END) AS priceUAH,
+                 SUM(CASE WHEN prices.symbol = 'USD' THEN prices.value ELSE 0 END) AS priceUSD
+          FROM products
+                   LEFT JOIN prices ON products.id = prices.product_id
+          WHERE products.order_id = ?
+      `,
+      [id],
+    );
+
+    orders[0].productsCount = products[0].count;
+    orders[0].priceUAH = products[0].priceUAH;
+    orders[0].priceUSD = products[0].priceUSD;
 
     return {
       ...orders[0],
