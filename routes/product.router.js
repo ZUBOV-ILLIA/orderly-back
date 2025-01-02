@@ -5,8 +5,8 @@ const productRouter = express.Router();
 
 productRouter.get('/', productController.get);
 productRouter.get('/:id', productController.getOne);
-productRouter.post('/by-ids', productController.getMany);
-productRouter.post('/create', productController.create);
-productRouter.delete('/delete/:id', productController.remove);
+productRouter.get('/by-order/:orderId', productController.getByOrderId);
+productRouter.post('/create/:orderId', productController.create);
+productRouter.delete('/:id', productController.remove);
 
 export default productRouter;

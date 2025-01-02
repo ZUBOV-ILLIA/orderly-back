@@ -50,66 +50,9 @@ const remove = async (req, res) => {
   }
 };
 
-const getOrderProducts = async (req, res) => {
-  try {
-    const isOrderExists = await orderService.getById(req.params.id);
-
-    if (!isOrderExists) {
-      res.status(404);
-      res.send(`Order with id  ${req.params.id} not found`);
-    }
-
-    const orderProducts = await orderService.getOrderProducts(req.params.id);
-
-    res.json(orderProducts);
-  } catch (e) {
-    console.log(e);
-    res.sendStatus(500);
-  }
-};
-
-const addProductsToOrder = async (req, res) => {
-  try {
-    const isOrderExists = await orderService.getById(req.params.id);
-
-    if (!isOrderExists) {
-      res.status(404);
-      res.send(`Order with id  ${req.params.id} not found`);
-    }
-
-    await orderService.addProductsToOrder(req.params.id, req.body);
-
-    res.sendStatus(200);
-  } catch (e) {
-    console.log(e);
-    res.sendStatus(500);
-  }
-};
-
-const removeProducts = async (req, res) => {
-  try {
-    const isOrderExists = await orderService.getById(req.params.id);
-
-    if (!isOrderExists) {
-      res.status(404);
-      res.send(`Order with id  ${req.params.id} not found`);
-    }
-
-    await orderService.removeProducts(req.params.id, req.body);
-
-    res.sendStatus(200);
-  } catch (e) {
-    console.log(e);
-    res.sendStatus(500);
-  }
-};
-
 export default {
   get,
   getOne,
   create,
   remove,
-  getOrderProducts,
-  addProductsToOrder,
-  removeProducts,
 };

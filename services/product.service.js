@@ -1,4 +1,8 @@
 import db from '../utils/db.js';
+import { getCurrencyRateToUAH } from '../utils/helpers.js';
+
+const currencyRateToUAH = await getCurrencyRateToUAH();
+const guarantyPeriod = 2;
 
 const getAll = async () => {
   try {
@@ -9,6 +13,10 @@ const getAll = async () => {
     const [prices] = await db.query(`
       SELECT *
       FROM prices
+    `);
+    const [orders] = await db.query(`
+      SELECT *
+      FROM orders
     `);
 
     return products.map(product => {
@@ -21,6 +29,7 @@ const getAll = async () => {
 
       return {
         ...product,
+        order: orders.find(order => order.id === product.order_id),
         prices: resultPrices,
       };
     });
@@ -40,7 +49,6 @@ const getById = async id => {
     `,
       [id],
     );
-
     const [prices] = await db.query(
       `
       SELECT *
@@ -48,6 +56,14 @@ const getById = async id => {
       WHERE product_id = ?
     `,
       [id],
+    );
+    const [order] = await db.query(
+      `
+      SELECT *
+      FROM orders
+      WHERE id = ?
+    `,
+      [products[0].order_id],
     );
 
     const resultPrices = prices.map(price => ({
@@ -58,6 +74,7 @@ const getById = async id => {
 
     return {
       ...products[0],
+      order: order[0],
       prices: resultPrices,
     };
   } catch (error) {
@@ -66,24 +83,32 @@ const getById = async id => {
   }
 };
 
-const getMany = async ids => {
+const getByOrderId = async orderId => {
   try {
     const [products] = await db.query(
       `
       SELECT *
       FROM products
-      WHERE id IN (?)
+      WHERE order_id = ?
     `,
-      [ids],
+      [orderId],
     );
-
+    const productIds = products.map(product => product.id);
     const [prices] = await db.query(
       `
       SELECT *
       FROM prices
       WHERE product_id IN (?)
     `,
-      [ids],
+      [productIds],
+    );
+    const [order] = await db.query(
+      `
+      SELECT *
+      FROM orders
+      WHERE id = ?
+    `,
+      [orderId],
     );
 
     return products.map(product => {
@@ -96,6 +121,7 @@ const getMany = async ids => {
 
       return {
         ...product,
+        order: order[0],
         prices: resultPrices,
       };
     });
@@ -105,8 +131,28 @@ const getMany = async ids => {
   }
 };
 
-const create = async productData => {
+const create = async (orderId, productData) => {
   try {
+    productData.date = new Date();
+    productData.guarantee_start = productData.date;
+    productData.guarantee_end = new Date(productData.date);
+    productData.guarantee_end.setFullYear(
+      productData.guarantee_end.getFullYear() + guarantyPeriod,
+    );
+
+    productData.prices = [
+      {
+        value: productData.price,
+        symbol: 'UAH',
+        isDefault: productData.priceIsDefault ? 1 : 0,
+      },
+      {
+        value: (productData.price * currencyRateToUAH.uah.usd).toFixed(2),
+        symbol: 'USD',
+        isDefault: productData.priceIsDefault ? 0 : 1,
+      },
+    ];
+
     const {
       serialNumber,
       isNew,
@@ -122,8 +168,8 @@ const create = async productData => {
 
     const [result] = await db.query(
       `
-      INSERT INTO products (serialNumber, isNew, photo, title, type, specification, guarantee_start, guarantee_end, date)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO products (serialNumber, isNew, photo, title, type, specification, guarantee_start, guarantee_end, order_id, date)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
       [
         serialNumber,
@@ -134,6 +180,7 @@ const create = async productData => {
         specification,
         guarantee_start,
         guarantee_end,
+        orderId,
         date,
       ],
     );
@@ -152,6 +199,7 @@ const create = async productData => {
       specification,
       guarantee_start,
       guarantee_end,
+      orderId,
       date,
       prices,
     };
@@ -171,7 +219,7 @@ const remove = async id => {
   );
 };
 
-const createProductPrices = async (productId, prices) => {
+async function createProductPrices(productId, prices) {
   try {
     const result = await db.query(
       `
@@ -193,12 +241,12 @@ const createProductPrices = async (productId, prices) => {
     console.error('Error creating prices:', error);
     throw new Error('Could not create prices');
   }
-};
+}
 
 export default {
   getAll,
   getById,
-  getMany,
+  getByOrderId,
   create,
   remove,
 };

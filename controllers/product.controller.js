@@ -1,8 +1,5 @@
 import productService from '../services/product.service.js';
-import { getCurrencyRateToUAH } from '../utils/helpers.js';
-
-const currencyRateToUAH = await getCurrencyRateToUAH();
-const guarantyPeriod = 2;
+import orderService from '../services/order.service.js';
 
 const get = async (req, res) => {
   try {
@@ -27,9 +24,9 @@ const getOne = async (req, res) => {
   }
 };
 
-const getMany = async (req, res) => {
+const getByOrderId = async (req, res) => {
   try {
-    const products = await productService.getMany(req.body);
+    const products = await productService.getByOrderId(req.params.orderId);
 
     res.json(products);
   } catch (e) {
@@ -42,29 +39,16 @@ const create = async (req, res) => {
   try {
     const productData = req.body;
 
-    productData.date = new Date();
-    productData.guarantee_start = productData.date;
-    productData.guarantee_end = new Date(productData.date);
-    productData.guarantee_end.setFullYear(
-      productData.guarantee_end.getFullYear() + guarantyPeriod,
+    const order = await orderService.getById(req.params.orderId);
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    const product = await productService.create(
+      req.params.orderId,
+      productData,
     );
-
-    const prices = [
-      {
-        value: productData.price,
-        symbol: 'UAH',
-        isDefault: productData.priceIsDefault ? 1 : 0,
-      },
-      {
-        value: (productData.price * currencyRateToUAH.uah.usd).toFixed(2),
-        symbol: 'USD',
-        isDefault: productData.priceIsDefault ? 0 : 1,
-      },
-    ];
-
-    productData.prices = prices;
-
-    const product = await productService.create(productData, prices);
 
     res.json(product);
   } catch (e) {
@@ -87,7 +71,7 @@ const remove = async (req, res) => {
 export default {
   get,
   getOne,
-  getMany,
+  getByOrderId,
   create,
   remove,
 };

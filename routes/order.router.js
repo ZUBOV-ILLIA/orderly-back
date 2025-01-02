@@ -5,10 +5,7 @@ const orderRouter = express.Router();
 
 orderRouter.get('/', orderController.get);
 orderRouter.get('/:id', orderController.getOne);
-orderRouter.post('/create', orderController.create);
-orderRouter.get('/products/:id', orderController.getOrderProducts);
-orderRouter.post('/add-products/:id', orderController.addProductsToOrder);
-orderRouter.post('/remove-products/:id', orderController.removeProducts);
-orderRouter.delete('/delete/:id', orderController.remove);
+orderRouter.post('/', orderController.create);
+orderRouter.delete('/:id', orderController.remove);
 
 export default orderRouter;
