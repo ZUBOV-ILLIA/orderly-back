@@ -7,7 +7,7 @@ CREATE DATABASE orderly_database;
             title VARCHAR(255) NOT NULL,
             date DATETIME NOT NULL,
             description TEXT
-        );
+        ) DEFAULT CHARSET=utf8mb4;
 
         CREATE TABLE products (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -22,7 +22,7 @@ CREATE DATABASE orderly_database;
             date DATETIME NOT NULL,
             order_id INT,
             FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
-        );
+        ) DEFAULT CHARSET=utf8mb4;
 
         CREATE TABLE prices (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -31,4 +31,4 @@ CREATE DATABASE orderly_database;
             symbol VARCHAR(3) NOT NULL,
             isDefault TINYINT NOT NULL,
             FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-        );
+        ) DEFAULT CHARSET=utf8mb4;
