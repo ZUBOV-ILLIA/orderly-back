@@ -14,8 +14,7 @@ const get = async (req, res) => {
 
 const getOne = async (req, res) => {
   try {
-    const { id } = req.params;
-    const product = await productService.getById(id);
+    const product = await productService.getById(req.params.id);
 
     res.json(product);
   } catch (e) {
@@ -29,6 +28,28 @@ const getByOrderId = async (req, res) => {
     const products = await productService.getByOrderId(req.params.orderId);
 
     res.json(products);
+  } catch (e) {
+    console.log(e);
+    res.sendStatus(500);
+  }
+};
+
+const getByType = async (req, res) => {
+  try {
+    const product = await productService.getByType(req.params.type);
+
+    res.json(product);
+  } catch (e) {
+    console.log(e);
+    res.sendStatus(500);
+  }
+};
+
+const getAllTypes = async (req, res) => {
+  try {
+    const types = await productService.getAllTypes();
+
+    res.json(types);
   } catch (e) {
     console.log(e);
     res.sendStatus(500);
@@ -72,6 +93,8 @@ export default {
   get,
   getOne,
   getByOrderId,
+  getByType,
+  getAllTypes,
   create,
   remove,
 };

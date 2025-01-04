@@ -10,11 +10,12 @@ const getAll = async () => {
     for (const order of orders) {
       const [products] = await db.query(
         `
-          SELECT COUNT(*) AS count,
-                 SUM(CASE WHEN prices.symbol = 'UAH' THEN prices.value ELSE 0 END) AS priceUAH,
-                 SUM(CASE WHEN prices.symbol = 'USD' THEN prices.value ELSE 0 END) AS priceUSD
+          SELECT
+            COUNT(DISTINCT products.id) AS count,
+            SUM(CASE WHEN prices.symbol = 'UAH' THEN prices.value ELSE 0 END) AS priceUAH,
+            SUM(CASE WHEN prices.symbol = 'USD' THEN prices.value ELSE 0 END) AS priceUSD
           FROM products
-                   LEFT JOIN prices ON products.id = prices.product_id
+          LEFT JOIN prices ON products.id = prices.product_id
           WHERE products.order_id = ?
       `,
         [order.id],

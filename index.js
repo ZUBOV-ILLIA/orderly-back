@@ -17,30 +17,6 @@ app.get('/', (req, res) => {
 app.use('/products', productRouter);
 app.use('/orders', orderRouter);
 
-// ================
-import path from 'path';
-import { uploadsDir, upload } from './multer.js';
-// import { fileURLToPath } from 'url';
-
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
-
-app.use('/uploads', express.static(uploadsDir));
-
-app.post('/upload', upload.single('avatar'), function (req, res) {
-  res.send(req.file);
-});
-
-app.get('/download', function (req, res) {
-  const filePath = path.join(uploadsDir, req.query.filename);
-  res.sendFile(filePath, err => {
-    if (err) {
-      res.status(404).send('File not found');
-    }
-  });
-});
-// ================
-
 const server = app.listen(port, () => {
   console.log(`http://localhost:${port}`);
 });

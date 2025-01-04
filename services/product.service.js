@@ -49,6 +49,11 @@ const getById = async id => {
     `,
       [id],
     );
+
+    if (!products.length) {
+      return null;
+    }
+
     const [prices] = await db.query(
       `
       SELECT *
@@ -57,6 +62,7 @@ const getById = async id => {
     `,
       [id],
     );
+
     const [order] = await db.query(
       `
       SELECT *
@@ -93,6 +99,11 @@ const getByOrderId = async orderId => {
     `,
       [orderId],
     );
+
+    if (!products.length) {
+      return [];
+    }
+
     const productIds = products.map(product => product.id);
     const [prices] = await db.query(
       `
@@ -128,6 +139,73 @@ const getByOrderId = async orderId => {
   } catch (error) {
     console.error('Error fetching products by IDs:', error);
     throw new Error('Could not fetch products by IDs');
+  }
+};
+
+const getByType = async type => {
+  try {
+    const [products] = await db.query(
+      `
+      SELECT *
+      FROM products
+      WHERE type = ?
+    `,
+      [type],
+    );
+
+    if (!products.length) {
+      return [];
+    }
+
+    const productIds = products.map(product => product.id);
+    const [prices] = await db.query(
+      `
+      SELECT *
+      FROM prices
+      WHERE product_id IN (?)
+    `,
+      [productIds],
+    );
+    const [order] = await db.query(
+      `
+      SELECT *
+      FROM orders
+      WHERE id = ?
+    `,
+      [products[0].order_id],
+    );
+
+    return products.map(product => {
+      const pPrice = prices.filter(price => price.product_id === product.id);
+      const resultPrices = pPrice.map(price => ({
+        value: price.value,
+        symbol: price.symbol,
+        isDefault: price.isDefault,
+      }));
+
+      return {
+        ...product,
+        order: order[0],
+        prices: resultPrices,
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching products by type:', error);
+    throw new Error('Could not fetch products by type');
+  }
+};
+
+const getAllTypes = async () => {
+  try {
+    const [types] = await db.query(`
+      SELECT DISTINCT type
+      FROM products
+    `);
+
+    return types.map(type => type.type);
+  } catch (error) {
+    console.error('Error fetching product types:', error);
+    throw new Error('Could not fetch product types');
   }
 };
 
@@ -247,6 +325,8 @@ export default {
   getAll,
   getById,
   getByOrderId,
+  getByType,
+  getAllTypes,
   create,
   remove,
 };
