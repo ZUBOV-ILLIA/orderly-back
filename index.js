@@ -3,6 +3,7 @@ import cors from 'cors';
 import { createWebSocketServer } from './websocket.js';
 import productRouter from './routes/product.router.js';
 import orderRouter from './routes/order.router.js';
+import authRouter from './routes/auth.router.js';
 
 const app = express();
 const port = 3005;
@@ -10,10 +11,7 @@ const port = 3005;
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
-
+app.use('/auth', authRouter);
 app.use('/products', productRouter);
 app.use('/orders', orderRouter);
 
