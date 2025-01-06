@@ -3,13 +3,13 @@ CREATE DATABASE orderly_database;
     USE orderly_database;
 
         CREATE TABLE users (
-            id VARCHAR(255) PRIMARY KEY UNIQUE,
-            email VARCHAR(255) NOT NULL UNIQUE,
-            password VARCHAR(255) NOT NULL,
-            role VARCHAR(255) NOT NULL,
-            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            activation_code VARCHAR(255)
+           id VARCHAR(50) PRIMARY KEY,
+           email VARCHAR(50) NOT NULL UNIQUE,
+           password VARCHAR(255) NOT NULL,
+           role VARCHAR(255) NOT NULL,
+           avatar VARCHAR(255) DEFAULT NULL,
+           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+           activation_code VARCHAR(255)
         ) DEFAULT CHARSET=utf8mb4;
 
         CREATE TABLE orders (
