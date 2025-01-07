@@ -51,8 +51,56 @@ const getUserBy = async ({ id = '', email = '', activationLink = '' }) => {
   }
 };
 
+const updateUserAvatar = async ({ id, avatar }) => {
+  try {
+    await db.query(
+      `
+      UPDATE users
+      SET avatar = '${avatar}'
+      WHERE id = '${id}'
+    `,
+    );
+
+    return { id, avatar };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const updateUserPassword = async ({ id, password }) => {
+  try {
+    await db.query(
+      `
+      UPDATE users
+      SET password = '${password}'
+      WHERE id = '${id}'
+    `,
+    );
+
+    return { id };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const deleteUser = async ({ id }) => {
+  try {
+    await db.query(
+      `
+      DELETE FROM users
+      WHERE id = '${id}'
+    `,
+    );
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export default {
   createUser,
   activateUser,
   getUserBy,
+  updateUserAvatar,
+  updateUserPassword,
+  deleteUser,
 };

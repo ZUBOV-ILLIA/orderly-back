@@ -68,7 +68,7 @@ const login = async (req, res) => {
 
     const accessToken = jwtService.sign(user);
 
-    res.send(accessToken);
+    res.send({ jwt: accessToken, userId: user.id });
   } catch (error) {
     console.log(error);
   }
