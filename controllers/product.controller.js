@@ -66,6 +66,14 @@ const create = async (req, res) => {
       return res.status(404).json({ message: 'Order not found' });
     }
 
+    const isProductExist = await productService.isProductExist(
+      productData.serialNumber,
+    );
+
+    if (isProductExist) {
+      return res.json({ message: 'Product already exists' });
+    }
+
     const product = await productService.create(
       req.params.orderId,
       productData,

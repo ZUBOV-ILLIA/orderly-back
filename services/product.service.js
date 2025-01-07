@@ -89,6 +89,24 @@ const getById = async id => {
   }
 };
 
+const isProductExist = async serialNumber => {
+  try {
+    const [products] = await db.query(
+      `
+      SELECT *
+      FROM products
+      WHERE serialNumber = ?
+    `,
+      [serialNumber],
+    );
+
+    return !!products.length;
+  } catch (error) {
+    console.error('Error checking if order exists:', error);
+    throw new Error('Could not check if order exists');
+  }
+};
+
 const getByOrderId = async orderId => {
   try {
     const [products] = await db.query(
@@ -324,6 +342,7 @@ async function createProductPrices(productId, prices) {
 export default {
   getAll,
   getById,
+  isProductExist,
   getByOrderId,
   getByType,
   getAllTypes,
